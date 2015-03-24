@@ -14,7 +14,9 @@ int main(int argc, char * argv[])
 	}
 	else 
 	{
-		std::cout << "Provide .csv file to parse. Usage: [./Parser Workbook1.csv]\n--------------" << std::endl;
+		std::cout << "Using default csf file (Workbook1.csv)" << std::endl;
+		std::cout << "To provide a custom csv file, run: [./Parser Workbook1.csv]" << std::endl;
+		std::cout << "--------------" << std::endl;
 	}
 	
 	std::ifstream csvFile(filename.c_str());

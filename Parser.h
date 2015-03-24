@@ -16,12 +16,10 @@ public:
 
 private:
 	std::istream & submission_;
-	// std::string line_;
 	unsigned int lineNumber_;
 	unsigned int charPosition_;
-	char seperator_;
 
-	enum State { isSeperator, isQuoteStart, isQuoteEnd, isString, isSuperString };
+	enum State { isSeparator, isQuoteStart, isQuoteEnd, isString, isSuperString };
 	State state_;
 
 	bool readline();

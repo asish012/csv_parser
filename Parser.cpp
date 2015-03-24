@@ -2,7 +2,9 @@
 #include <iostream>
 #include <cstdio>
 
-Parser::Parser(std::istream & input_stream) : submission_(input_stream), lineNumber_(0), charPosition_(0), state_(isSeperator), line_(""), seperator_(',')
+const unsigned char separator = ',';
+
+Parser::Parser(std::istream & input_stream) : submission_(input_stream), lineNumber_(0), charPosition_(0), state_(isSeparator), line_("")
 {}
 
 unsigned int Parser::lineNumber()
@@ -15,15 +17,14 @@ std::string Parser::nextField()
 	std::string field;
 	while (char c = nextChar())
 	{
-		// printf("--- nextChar %c (%0x) [Pos: %d] state_ %d \n", c, c, (charPosition_ - 1), state_);
 		switch(state_)
 		{
-			case isSeperator:
+			case isSeparator:
 				if (c == '\"')
 				{
 					state_ = isSuperString;
 				}
-				else if (c == ',')
+				else if (c == separator)
 				{
 					field = "";
 					return field;
@@ -35,9 +36,9 @@ std::string Parser::nextField()
 				}
 				break;
 			case isString:
-				if (c == seperator_ or c == '\n')
+				if (c == separator or c == '\n')
 				{
-					state_ = isSeperator;					
+					state_ = isSeparator;					
 					return field;
 				}
 				else
@@ -51,7 +52,7 @@ std::string Parser::nextField()
 					state_ = isQuoteEnd;					
 					if (charPosition_ >= line_.size())
 					{
-						state_ = isSeperator;
+						state_ = isSeparator;
 						return field;
 					}
 				}
@@ -67,9 +68,9 @@ std::string Parser::nextField()
 					field += '\"';
 					state_ = isSuperString;
 				}
-				else if (c == seperator_ or c == '\n')
+				else if (c == separator or c == '\n')
 				{
-					state_ = isSeperator;
+					state_ = isSeparator;
 					return field;
 				}
 				break;
@@ -105,6 +106,5 @@ char Parser::nextChar()
 			return 0;
 		}
 	}
-	// std::cout << "*** line_" << line_ << std::endl;
 	return line_[charPosition_++];
 }
