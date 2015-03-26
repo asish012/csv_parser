@@ -6,29 +6,33 @@
 int main(int argc, char * argv[])
 {
 	// std::cout << "CSV Parser version 0.1" << std::endl;
-	
+
 	std::string filename("Workbook1.csv");
-	if (argc > 1)
-	{
+	if (argc > 1) {
 		filename.assign(argv[1]);
 	}
-	else 
-	{
+	else {
 		std::cout << "Using default csf file (Workbook1.csv)" << std::endl;
 		std::cout << "To provide a custom csv file, run: [./Parser Workbook1.csv]" << std::endl;
 		std::cout << "--------------" << std::endl;
 	}
-	
+
 	std::ifstream csvFile(filename.c_str());
-	if (not csvFile.is_open())
-	{
+	if (not csvFile.is_open()) {
 		std::cout << "File couldn't open." << std::endl;
 		return 1;
 	}
-	Parser parser(csvFile);
+
+	std::string test_str = "FirstName,LastName,Title,ReportsTo.Email,Birthdate,Description\n"
+						   "Tom  ,Jones,Senior Director,buyer@salesforcesample.com,1940-06-07Z,\"Self-described as \"\"the top\"\" branding guru on the West Coast\"\n"
+						   "Ian,Dury,Chief Imagineer,cto@salesforcesample.com,,\"World-renowned expert in fuzzy logic design.\n"
+						   "Influential in technology purchases.\"";
+
+	// Parser parser(csvFile);
+	Parser parser(test_str);
 
 	std::string field = parser.nextField();
-	while (field != "_EOF_")
+	while (field != "THE_END")
 	{
 		std::cout << field << std::endl;
 		field = parser.nextField();
