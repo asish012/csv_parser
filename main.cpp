@@ -31,12 +31,15 @@ int main(int argc, char * argv[])
 	// Parser parser(csvFile);
 	Parser parser(test_str);
 
-	std::string field = parser.nextField();
-	while (field != "THE_END")
+	std::vector<std::string> headers = parser.getHeader();
+	for (std::vector<std::string>::iterator i = headers.begin(); i != headers.end(); ++i)
 	{
-		std::cout << field << std::endl;
-		field = parser.nextField();
+		std::cout << *i << std::endl;
 	}
 
+	// while (1)
+	// {
+	// 	std::cout << "::" << parser.nextField() << std::endl;
+	// }
 	return 0;
 }

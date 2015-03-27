@@ -1,19 +1,23 @@
 #include "Parser.h"
 #include <iostream>
 #include <cstdio>
-#include <vector>
 
+#define END "THE_END"
 const char separator = ',';
 
-Parser::Parser(std::istream & input_stream) : submission_(input_stream), lineNumber_(0), charPosition_(0), state_(isSeparator), line_("")
-{}
-
-Parser::Parser(std::string input) : ss_(input), submission_(ss_), lineNumber_(0), charPosition_(0), state_(isSeparator), line_("")
-{}
-
-unsigned int Parser::lineNumber()
+Parser::Parser(std::istream & input_stream) : line_(""), submission_(input_stream), currentLine_(0), charPosition_(0), state_(isSeparator)
 {
-	return lineNumber_;
+	parse();
+}
+
+Parser::Parser(std::string input) : line_(""), ss_(input), submission_(ss_), currentLine_(0), charPosition_(0), state_(isSeparator)
+{
+	parse();
+}
+
+int Parser::lineNumber()
+{
+	return currentLine_;
 }
 
 std::string Parser::nextField()
@@ -78,13 +82,13 @@ std::string Parser::nextField()
 				break;
 		}
 	}
-	return "THE_END";
+	return END;
 }
 
 bool Parser::readline()
 {
 	if (std::getline(submission_, line_)) {
-		++lineNumber_;
+		++currentLine_;
 		charPosition_ = 0;
 		unsigned int len = line_.size();
 		if (line_[len - 1] == '\r') {
@@ -103,5 +107,36 @@ char Parser::nextChar()
 		}
 	}
 	return line_[charPosition_++];
+}
+
+// NOTE: Line counting for a csv file starts with 1. Parser constructor initializes currentLine_ with 0
+//       and when nextField() asks for reading first line it incriments currentLine_.
+void Parser::parse()
+{
+	static int marker = 0;
+	++marker;
+
+	std::vector<std::string> row;
+
+	while (1)
+	{
+		std::string field = nextField();
+		std::cout << "::" << field << marker << ":" << currentLine_ << std::endl;
+		if (marker == currentLine_ and field != END) {
+			row.push_back(field);
+		}
+		else
+			break;
+	}
+
+	if (marker < currentLine_)	{
+		recordList_.push_back(row);
+		parse();
+	}
+}
+
+std::vector<std::string> Parser::getHeader()
+{
+	return recordList_[0];
 }
 
