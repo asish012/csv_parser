@@ -1,4 +1,7 @@
 FirstName,LastName,Title,ReportsTo.Email,Birthdate,Description
-Tom  ,Jones,Senior Director,buyer@salesforcesample.com,1940-06-07Z,"Self-described as ""the top"" branding guru on the West Coast"
-Ian,Dury,Chief Imagineer,cto@salesforcesample.com,,"World-renowned expert in fuzzy logic design.
-Influential in technology purchases."
+Tom  ,Jones,Senior Director,buyer@salesforcesample.com,1940-06-07Z,"Self-described as ""the top"" brand on the West"
+Ian,Dury,Chief Imagineer,cto@salesforcesample.com,,"World-renowned
+ expert design."
+FirstName,LastName,Title,ReportsTo.Email,Birthdate,Description,
+"FirstName","LastName","Title","ReportsTo.Email",
+FirstName,"LastName",Title,ReportsTo.Email,"Birthdate"

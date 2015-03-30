@@ -28,8 +28,8 @@ int main(int argc, char * argv[])
 						   "Ian,Dury,Chief Imagineer,cto@salesforcesample.com,,\"World-renowned expert in fuzzy logic design.\n"
 						   "Influential in technology purchases.\"";
 
-	// Parser parser(csvFile);
-	Parser parser(test_str);
+	Parser parser(csvFile);
+	// Parser parser(test_str);
 
 	std::vector<std::string> headers = parser.getHeader();
 	for (std::vector<std::string>::iterator i = headers.begin(); i != headers.end(); ++i)

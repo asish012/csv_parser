@@ -32,26 +32,35 @@ std::string Parser::nextField()
 					state_ = isSuperString;
 				}
 				else if (c == separator) {
-					field = "";
-					return field;
+					return "";
+				}
+				else if (charPosition_ >= line_.size()) {
+					// this also  means a end of record
+					return "";
 				}
 				else if (c != '\n') {
+					// here c is Alpha neumeric or Space char
 					field += c;
 					state_ = isString;
 				}
 				break;
 			case isString:
-				if (c == separator or c == '\n') {
+				if (c == separator) {
 					state_ = isSeparator;
 					return field;
+					// if (charPosition_ >= line_.size()) {
+					// 	// this also  means a end of record
+					// 	return "";
+					// }
 				}
-				else if (charPosition_ == std::strlen(line_.c_str())) {
-					/* charPosition points one step ahead of c. so accumulate c and return, because its end of line */
+				else if (charPosition_ >= line_.size()) {
+					// charPosition points one step ahead of c. at that time accumulate c and return, because its end of line
+					// this also  means a end of record
 					field += c;
 					state_ = isSeparator;
 					return field;
 				}
-				else {
+				else if (c != '\n') {
 					field += c;
 				}
 				break;
@@ -59,6 +68,7 @@ std::string Parser::nextField()
 				if (c == '\"') {
 					state_ = isQuoteEnd;
 					if (charPosition_ >= line_.size()) {
+						// this also  means a end of record
 						state_ = isSeparator;
 						return field;
 					}
@@ -90,7 +100,7 @@ bool Parser::readline()
 	if (std::getline(submission_, line_)) {
 		++currentLine_;
 		charPosition_ = 0;
-		unsigned int len = line_.size();
+		int len = line_.size();
 		if (line_[len - 1] == '\r') {
 			line_[len - 1] = '\n';
 		}
