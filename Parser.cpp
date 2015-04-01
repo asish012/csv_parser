@@ -98,6 +98,18 @@ std::string Parser::nextField()
 bool Parser::readline()
 {
 	if (std::getline(submission_, line_)) {
+		int n = std::count(line_.begin(), line_.end(), '\"');
+		std::cout << "#n:" << n << std::endl;
+		// if number of double-cote character is odd then read line untill that gets even (which will indicate that superString ended)
+		while (n > 0 and n % 2 != 0) {
+			std::string str;
+			if (not std::getline(submission_, str))
+				break;
+			line_ += str;
+			n = std::count(line_.begin(), line_.end(), '\"');
+			std::cout << "##n:" << n << std::endl;
+		}
+
 		++currentLine_;
 		charPosition_ = 0;
 		int len = line_.size();
