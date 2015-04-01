@@ -1,7 +1,7 @@
 FirstName,LastName,Title,ReportsTo.Email,Birthdate,Description
 Tom  ,Jones,Senior Director,buyer@salesforcesample.com,1940-06-07Z,"Self-described as ""the top"" brand on the West"
 Ian,Dury,Chief Imagineer,cto@salesforcesample.com,,"World-renowned
- expert design."
+expert design."
 FirstName,LastName,Title,ReportsTo.Email,Birthdate,Description,
 "FirstName","LastName","Title","ReportsTo.Email",
 FirstName,"LastName",Title,ReportsTo.Email,"Birthdate"

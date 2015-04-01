@@ -7,12 +7,24 @@ const char separator = ',';
 
 Parser::Parser(std::istream & input_stream) : line_(""), submission_(input_stream), currentLine_(0), charPosition_(0), state_(isSeparator)
 {
-	parse();
+	ss_ << submission_.rdbuf();
+	line_ = ss_.str();
+
+	if (line_[line_.size() - 1] == '\r') {
+		line_[line_.size() - 1] = '\n';
+	}
+	if (line_[line_.size() -1] != '\n') {
+		line_.append("\n");
+	}
+
+	// std::cout << "line_: " << line_ << std::endl;
+
+	// parse();
 }
 
 Parser::Parser(std::string input) : line_(""), ss_(input), submission_(ss_), currentLine_(0), charPosition_(0), state_(isSeparator)
 {
-	parse();
+	// parse();
 }
 
 int Parser::lineNumber()
@@ -25,6 +37,7 @@ std::string Parser::nextField()
 	std::string field;
 	while (char c = nextChar())
 	{
+		// std::cout << "@:" << c << std::endl;
 		switch(state_)
 		{
 			case isSeparator:
@@ -34,12 +47,13 @@ std::string Parser::nextField()
 				else if (c == separator) {
 					return "";
 				}
-				else if (charPosition_ >= line_.size()) {
-					// this also  means a end of record
+				else if (c == '\n') {
+					// TODO: Return row vector.
+					++currentLine_;
 					return "";
 				}
-				else if (c != '\n') {
-					// here c is Alpha neumeric or Space char
+				else {
+					// c is alpha neumeric or space character
 					field += c;
 					state_ = isString;
 				}
@@ -48,32 +62,32 @@ std::string Parser::nextField()
 				if (c == separator) {
 					state_ = isSeparator;
 					return field;
-					// if (charPosition_ >= line_.size()) {
-					// 	// this also  means a end of record
-					// 	return "";
-					// }
 				}
-				else if (charPosition_ >= line_.size()) {
-					// charPosition points one step ahead of c. at that time accumulate c and return, because its end of line
-					// this also  means a end of record
-					field += c;
+				else if (c == '\n') {
+					// TODO: Return row vector.
+					++currentLine_;
 					state_ = isSeparator;
 					return field;
 				}
-				else if (c != '\n') {
+				else /*if (c != '\n') */{
+					// c is alpha neumeric or space character
 					field += c;
 				}
 				break;
 			case isSuperString:
-				if (c == '\"') {
-					state_ = isQuoteEnd;
-					if (charPosition_ >= line_.size()) {
-						// this also  means a end of record
-						state_ = isSeparator;
-						return field;
-					}
+				if (charPosition_ >= line_.size()) {
+					throw "Invalid CSV File";
 				}
-				else if (c != '\n') {
+				else if (c == '\"') {
+					state_ = isQuoteEnd;
+				}
+				else if (c == '\n')
+				{
+					/* replace line-break with a space-character within super string */
+					field += " ";
+				}
+				else /*if (c != '\n')*/ {
+					// c can be anything except \n (alpha,numeric,space,comma ...)
 					field += c;
 					state_ = isSuperString;
 				}
@@ -83,9 +97,18 @@ std::string Parser::nextField()
 					field += '\"';
 					state_ = isSuperString;
 				}
-				else if (c == separator or c == '\n') {
+				else if (c == separator) {
 					state_ = isSeparator;
 					return field;
+				}
+				else if (c == '\n') {
+					// TODO: Return row vector.
+					++currentLine_;
+					state_ = isSeparator;
+					return field;
+				}
+				else {
+					throw "Invalid CSV File";
 				}
 				break;
 			default:
@@ -97,24 +120,21 @@ std::string Parser::nextField()
 
 bool Parser::readline()
 {
-	if (std::getline(submission_, line_)) {
+	// if (std::getline(submission_, line_)) {
+		line_ = ss_.str();
+
 		++currentLine_;
 		charPosition_ = 0;
-		int len = line_.size();
-		if (line_[len - 1] == '\r') {
-			line_[len - 1] = '\n';
-		}
+
 		return true;
-	}
-	return false;
+	// }
+	// return false;
 }
 
 char Parser::nextChar()
 {
 	if (charPosition_ >= line_.size()) {
-		if (not readline()) {
-			return 0;
-		}
+		return 0;
 	}
 	return line_[charPosition_++];
 }
