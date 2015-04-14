@@ -2,7 +2,6 @@
 #include <iostream>
 #include <cstdio>
 
-#define END "THE_END"
 const char separator = ',';
 
 Parser::Parser(std::istream & input_stream) : line_(""), submission_(input_stream), currentLine_(0), charPosition_(0), state_(isSeparator)
@@ -20,8 +19,9 @@ int Parser::lineNumber()
 	return currentLine_;
 }
 
-std::string Parser::nextField()
+std::vector<std::string> Parser::parseLine()
 {
+	std::vector<std::string> result;
 	std::string field;
 	while (char c = nextChar())
 	{
@@ -32,11 +32,11 @@ std::string Parser::nextField()
 					state_ = isSuperString;
 				}
 				else if (c == separator) {
-					return "";
+					result.push_back("");
 				}
 				else if (charPosition_ >= line_.size()) {
-					// this also  means a end of record
-					return "";
+					// end of record
+					result.push_back("");
 				}
 				else if (c != '\n') {
 					// here c is Alpha neumeric or Space char
@@ -47,18 +47,19 @@ std::string Parser::nextField()
 			case isString:
 				if (c == separator) {
 					state_ = isSeparator;
-					return field;
-					// if (charPosition_ >= line_.size()) {
-					// 	// this also  means a end of record
-					// 	return "";
-					// }
+					result.push_back(field);
+					field = "";
+					if (charPosition_ >= line_.size()) {
+						// line ends with a comma means an empty attribute at the end
+						result.push_back("");
+					}
 				}
 				else if (charPosition_ >= line_.size()) {
-					// charPosition points one step ahead of c. at that time accumulate c and return, because its end of line
-					// this also  means a end of record
+					// end of line, charPosition points one step ahead of c, so accumulate c and finalize attribute
 					field += c;
 					state_ = isSeparator;
-					return field;
+					result.push_back(field);
+					field = "";
 				}
 				else if (c != '\n') {
 					field += c;
@@ -68,9 +69,10 @@ std::string Parser::nextField()
 				if (c == '\"') {
 					state_ = isQuoteEnd;
 					if (charPosition_ >= line_.size()) {
-						// this also  means a end of record
+						// end of record
 						state_ = isSeparator;
-						return field;
+						result.push_back(field);
+						field = "";
 					}
 				}
 				else if (c != '\n') {
@@ -85,29 +87,30 @@ std::string Parser::nextField()
 				}
 				else if (c == separator or c == '\n') {
 					state_ = isSeparator;
-					return field;
+					result.push_back(field);
+					field = "";
 				}
 				break;
 			default:
 				break;
 		}
 	}
-	return END;
+	return result;
 }
 
 bool Parser::readline()
 {
 	if (std::getline(submission_, line_)) {
 		int n = std::count(line_.begin(), line_.end(), '\"');
-		std::cout << "#n:" << n << std::endl;
-		// if number of double-cote character is odd then read line untill that gets even (which will indicate that superString ended)
+		// if number of double-cote character is odd then read line_ until it gets even (which indicates the end of superString)
 		while (n > 0 and n % 2 != 0) {
 			std::string str;
-			if (not std::getline(submission_, str))
-				break;
+			if (not std::getline(submission_, str)) {
+				// break;
+				throw "Invalid CSV File.";
+			}
 			line_ += str;
 			n = std::count(line_.begin(), line_.end(), '\"');
-			std::cout << "##n:" << n << std::endl;
 		}
 
 		++currentLine_;
@@ -124,41 +127,31 @@ bool Parser::readline()
 char Parser::nextChar()
 {
 	if (charPosition_ >= line_.size()) {
-		if (not readline()) {
+		// if (not readline()) {
 			return 0;
-		}
+		// }
 	}
 	return line_[charPosition_++];
 }
 
 // NOTE: Line counting for a csv file starts with 1. Parser constructor initializes currentLine_ with 0
-//       and when nextField() asks for reading first line it incriments currentLine_.
+//       and when parseLine() asks for reading first line it incriments currentLine_.
 void Parser::parse()
 {
-	static int marker = 0;
-	++marker;
-
-	std::vector<std::string> row;
-
-	while (1)
+	while (readline())
 	{
-		std::string field = nextField();
-		std::cout << "::" << field << marker << ":" << currentLine_ << std::endl;
-		if (marker == currentLine_ and field != END) {
-			row.push_back(field);
-		}
-		else
-			break;
-	}
-
-	if (marker < currentLine_)	{
+		std::vector<std::string> row = parseLine();
 		recordList_.push_back(row);
-		parse();
 	}
 }
 
 std::vector<std::string> Parser::getHeader()
 {
 	return recordList_[0];
+}
+
+std::vector< std::vector<std::string> > Parser::getRecords()
+{
+	return recordList_;
 }
 
