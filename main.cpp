@@ -37,7 +37,7 @@ int main(int argc, char * argv[])
 		std::vector<std::string> row = *i;
 		for (std::vector<std::string>::iterator j = row.begin(); j != row.end(); ++j)
 		{
-			std::cout << *j << ";";
+			std::cout << *j << ",";
 		}
 		std::cout << std::endl;
 	}
